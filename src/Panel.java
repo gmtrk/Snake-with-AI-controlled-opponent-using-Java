@@ -18,6 +18,8 @@ public class Panel extends JPanel implements ActionListener {
     int fruitY;
     char direction = 'R';
     boolean running = false;
+    boolean launched = false;
+    boolean hidebutton = false;
     Timer time;
     Random random;
     Panel(){
@@ -30,7 +32,6 @@ public class Panel extends JPanel implements ActionListener {
     }
     public void startGame() {
         newFruit();
-        running = true;
         time = new Timer(DELAY, this);
         time.start();
 
@@ -40,7 +41,11 @@ public class Panel extends JPanel implements ActionListener {
         draw(g);
     }
     public void draw(Graphics g){
-        if (running==true) {
+        if(!launched){
+            GameMenu(g);
+        }
+        else{
+        if (running) {
             for (int i = 0; i < GAME_HEIGHT / UNIT_SIZE; i++) {
                 g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, GAME_HEIGHT);
                 g.drawLine(0, i * UNIT_SIZE, GAME_WIDTH, i * UNIT_SIZE);
@@ -63,8 +68,10 @@ public class Panel extends JPanel implements ActionListener {
             g.drawString("Twoj wynik: " +fruitsEaten, GAME_WIDTH/8, g.getFont().getSize());
         }
         else {
+            hidebutton = false;
             GameOver(g);
         }
+    }
     }
     public void newFruit(){
         fruitX = random.nextInt((int)(GAME_WIDTH/UNIT_SIZE))*UNIT_SIZE;
@@ -122,6 +129,54 @@ public class Panel extends JPanel implements ActionListener {
         g.setFont(new Font("Arial",Font.BOLD, 75));
         FontMetrics metrics1 = getFontMetrics(g.getFont());
         g.drawString("Twoj wynik: " +fruitsEaten, (GAME_WIDTH- metrics1.stringWidth("Twoj wynik: " +fruitsEaten))/2, GAME_HEIGHT-g.getFont().getSize());
+
+        JButton b = new JButton("Restart?");
+        b.setBounds((GAME_WIDTH/2)-75,(GAME_HEIGHT/2)+25,150,50);
+        if(!hidebutton) {
+            this.add(b);
+            hidebutton = true;
+        }
+        b.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ResetGame();
+                startGame();
+                repaint();
+                running = true;
+                b.setVisible(false);
+            }
+        });
+    }
+    public void GameMenu(Graphics g) {
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial",Font.BOLD, 75));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Snake na javie", (GAME_WIDTH - metrics.stringWidth("Snake na javie"))/2, GAME_HEIGHT/2);
+        JButton b = new JButton("Rozpocznij gre!");
+        b.setBounds((GAME_WIDTH/2)-75,(GAME_HEIGHT/2)+25,150,50);
+        if(!hidebutton) {
+            this.add(b);
+            hidebutton = true;
+        }
+        b.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                launched = true;
+                running = true;
+                b.setVisible(false);
+            }
+        });
+
+    }
+    public void ResetGame(){
+        for(int i =0; i<bodyParts; i++){
+            x[i] = 0;
+            y[i] =0;
+        }
+        bodyParts = 4;
+        fruitsEaten = 0;
+        direction = 'R';
+
     }
     @Override
     public void actionPerformed(ActionEvent e) {
