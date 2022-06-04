@@ -90,7 +90,8 @@ public class Panel extends JPanel implements ActionListener {
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial",Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
-            g.drawString("Twoj wynik: " +x[0], GAME_WIDTH/8, g.getFont().getSize());
+            g.drawString("Twoj wynik: " +fruitsEaten, UNIT_SIZE, g.getFont().getSize());
+            g.drawString("Wynik AI: " +AIfruitsEaten, 7*UNIT_SIZE, g.getFont().getSize());
         }
         else {
             hidebutton = false;
@@ -190,6 +191,16 @@ public class Panel extends JPanel implements ActionListener {
             fruitsEaten++;
             newFruit(1);
         }
+        if((AIx[0] == fruitX[0]) && (AIy[0]==fruitY[0])){
+            AIbodyParts++;
+            AIfruitsEaten++;
+            newFruit(0);
+        }
+        if((AIx[0] == fruitX[1]) && (AIy[0]==fruitY[1])){
+            AIbodyParts++;
+            AIfruitsEaten++;
+            newFruit(1);
+        }
     }
     public void checkCollisions() {
         //jezeli waz uderzy w samego siebie
@@ -198,8 +209,36 @@ public class Panel extends JPanel implements ActionListener {
                 running = false;
             }
         }
+        //jezeli waz uderzy w AI
+        for(int i = bodyParts; i>0;i--){
+            if((x[0] == AIx[i])&&(y[0] ==AIy[i])){
+                running = false;
+            }
+        }
         //jezeli waz uderzy w krawedzie
         if(x[0]<0 || x[0] >= GAME_WIDTH || y[0]<0 || y[0]>=GAME_HEIGHT){
+            running = false;
+        }
+        if (running == false){
+            time.stop();
+        }
+        //jezeli AI waz uderzy w siebie
+        for(int i = bodyParts; i>0;i--){
+            if((AIx[0] == AIx[i])&&(AIy[0] ==AIy[i])){
+                won = true;
+                running = false;
+            }
+        }
+        //jezeli AI waz uderzy w gracza
+        for(int i = bodyParts; i>0;i--){
+            if((AIx[0] == x[i])&&(AIy[0] ==y[i])){
+                won = true;
+                running = false;
+            }
+        }
+        //jezeli AI waz uderzy w krawedzie
+        if(AIx[0]<0 || AIx[0] >= GAME_WIDTH || AIy[0]<0 || AIy[0]>=GAME_HEIGHT){
+            won = true;
             running = false;
         }
         if (running == false){
@@ -288,8 +327,11 @@ public class Panel extends JPanel implements ActionListener {
             x[i] = 0;
             y[i] =0;
         }
-        AIx[0] = GAME_WIDTH-UNIT_SIZE;
-        AIy[0] = GAME_HEIGHT-UNIT_SIZE;
+        for(int i =0; i<AIbodyParts; i++){
+            AIx[i] = GAME_WIDTH-UNIT_SIZE;
+            AIy[i] = GAME_HEIGHT-UNIT_SIZE;
+        }
+        won = false;
         AIbodyParts= 4;
         bodyParts = 4;
         AIfruitsEaten = 0;
