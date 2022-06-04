@@ -2,27 +2,41 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Panel extends JPanel implements ActionListener {
 
     static final int GAME_WIDTH = 800;
     static final int GAME_HEIGHT = 800;
-    static final int UNIT_SIZE = 25;
+    static final int UNIT_SIZE = 80;
     static final int GAME_UNITS = (GAME_WIDTH*GAME_HEIGHT)/UNIT_SIZE;
     static final int DELAY = 100;
     final int x[] = new int[GAME_UNITS];
     final int y[] = new int[GAME_UNITS];
     int bodyParts = 4;
     int fruitsEaten;
-    int fruitX;
-    int fruitY;
+    //coordinates for AI snake
+    final int AIx[] = new int[GAME_UNITS];
+
+    final int AIy[] = new int[GAME_UNITS];
+    int AIbodyParts = 5;
+    int AIfruitsEaten;
+    int fruitX[] = new int [2];
+    int newX[] = new int [2];
+    int fruitY[] = new int [2];;
+    int newY[] = new int [2];;
     char direction = 'R';
+    char AIdirection = 'L';
     boolean running = false;
     boolean launched = false;
     boolean hidebutton = false;
+    boolean isfruit;
+    boolean won = false;
     Timer time;
     Random random;
     Panel(){
+        AIx[0] = GAME_WIDTH-UNIT_SIZE;
+        AIy[0] = GAME_HEIGHT-UNIT_SIZE;
         random = new Random();
         this.setPreferredSize(new Dimension(GAME_WIDTH,GAME_HEIGHT));
         this.setBackground(Color.CYAN);
@@ -31,7 +45,8 @@ public class Panel extends JPanel implements ActionListener {
         startGame();
     }
     public void startGame() {
-        newFruit();
+        newFruit(0);
+        newFruit(1);
         time = new Timer(DELAY, this);
         time.start();
 
@@ -51,7 +66,8 @@ public class Panel extends JPanel implements ActionListener {
                 g.drawLine(0, i * UNIT_SIZE, GAME_WIDTH, i * UNIT_SIZE);
             }
             g.setColor(Color.YELLOW);
-            g.fillOval(fruitX, fruitY, UNIT_SIZE, UNIT_SIZE);
+            g.fillOval(fruitX[0], fruitY[0], UNIT_SIZE, UNIT_SIZE);
+            g.fillOval(fruitX[1], fruitY[1], UNIT_SIZE, UNIT_SIZE);
 
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
@@ -62,20 +78,63 @@ public class Panel extends JPanel implements ActionListener {
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
+            for (int i = 0; i < AIbodyParts; i++) {
+                if (i == 0) {
+                    g.setColor(Color.RED);
+                    g.fillRect(AIx[i], AIy[i], UNIT_SIZE, UNIT_SIZE);
+                } else {
+                    g.setColor(new Color(180, 45, 0));
+                    g.fillRect(AIx[i], AIy[i], UNIT_SIZE, UNIT_SIZE);
+                }
+            }
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial",Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
-            g.drawString("Twoj wynik: " +fruitsEaten, GAME_WIDTH/8, g.getFont().getSize());
+            g.drawString("Twoj wynik: " +x[0], GAME_WIDTH/8, g.getFont().getSize());
         }
         else {
             hidebutton = false;
+            if(won){
+                GameWon(g);
+            }
+            else{
             GameOver(g);
+        }
         }
     }
     }
-    public void newFruit(){
-        fruitX = random.nextInt((int)(GAME_WIDTH/UNIT_SIZE))*UNIT_SIZE;
-        fruitY = random.nextInt((int)(GAME_WIDTH/UNIT_SIZE))*UNIT_SIZE;
+    public boolean isTaken(int a, int b){
+
+        for(int i = 0; i<bodyParts; i++){
+            if(x[i] == a)
+            {
+
+                return true;
+            }
+            if(y[i] == b)
+            {
+
+                return true;
+            }
+        }
+        return false;
+    }
+    public void newFruit(int fruit){
+        newX[fruit] =ThreadLocalRandom.current().nextInt(0,(GAME_WIDTH/UNIT_SIZE))*UNIT_SIZE;
+        newY[fruit] =ThreadLocalRandom.current().nextInt(0,(GAME_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
+        //nie wier czemu to nie dziala jestem chyba glupi i nie rozumiem pewnych rzeczy
+       /* isfruit=isTaken(newX[fruit],newY[fruit]);
+        while(isfruit){
+            newX[fruit] = ThreadLocalRandom.current().nextInt(0,(GAME_WIDTH/UNIT_SIZE))*UNIT_SIZE;
+            newY[fruit] =ThreadLocalRandom.current().nextInt(0,(GAME_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
+            isfruit=isTaken(newX[fruit],newY[fruit]);
+            if (!isfruit)
+            {
+            break;
+            }
+        }*/
+        fruitX[fruit] = newX[fruit];
+        fruitY[fruit] = newY[fruit];
     }
     public void move() {
         for(int i = bodyParts; i>0; i--){
@@ -96,12 +155,40 @@ public class Panel extends JPanel implements ActionListener {
                 x[0] = x[0] +UNIT_SIZE;
                 break;
         }
+
     }
+    public void AImove(){
+        //dla AI
+        for(int i = AIbodyParts; i>0; i--){
+            AIx[i] =AIx[i-1];
+            AIy[i] =AIy[i-1];
+        }
+        switch(AIdirection){
+            case 'U':
+                AIy[0] = AIy[0] -UNIT_SIZE;
+                break;
+            case 'D':
+                AIy[0] = AIy[0] +UNIT_SIZE;
+                break;
+            case 'L':
+                AIx[0] = AIx[0] -UNIT_SIZE;
+                break;
+            case 'R':
+                AIx[0] = AIx[0] +UNIT_SIZE;
+                break;
+        }
+    }
+
     public void checkFruit() {
-        if((x[0] == fruitX) && (y[0]==fruitY)){
+        if((x[0] == fruitX[0]) && (y[0]==fruitY[0])){
             bodyParts++;
             fruitsEaten++;
-            newFruit();
+            newFruit(0);
+        }
+        if((x[0] == fruitX[1]) && (y[0]==fruitY[1])){
+            bodyParts++;
+            fruitsEaten++;
+            newFruit(1);
         }
     }
     public void checkCollisions() {
@@ -124,6 +211,34 @@ public class Panel extends JPanel implements ActionListener {
         g.setFont(new Font("Arial",Font.BOLD, 75));
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Koniec Gry", (GAME_WIDTH - metrics.stringWidth("Koniec Gry"))/2, GAME_HEIGHT/2);
+
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial",Font.BOLD, 75));
+        FontMetrics metrics1 = getFontMetrics(g.getFont());
+        g.drawString("Twoj wynik: " +fruitsEaten, (GAME_WIDTH- metrics1.stringWidth("Twoj wynik: " +fruitsEaten))/2, GAME_HEIGHT-g.getFont().getSize());
+
+        JButton b = new JButton("Restart?");
+        b.setBounds((GAME_WIDTH/2)-75,(GAME_HEIGHT/2)+25,150,50);
+        if(!hidebutton) {
+            this.add(b);
+            hidebutton = true;
+        }
+        b.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ResetGame();
+                startGame();
+                repaint();
+                running = true;
+                b.setVisible(false);
+            }
+        });
+    }
+    public void GameWon(Graphics g) {
+        g.setColor(Color.RED);
+        g.setFont(new Font("Arial",Font.BOLD, 75));
+        FontMetrics metrics = getFontMetrics(g.getFont());
+        g.drawString("Wygrales", (GAME_WIDTH - metrics.stringWidth("Wygrales"))/2, GAME_HEIGHT/2);
 
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial",Font.BOLD, 75));
@@ -173,15 +288,21 @@ public class Panel extends JPanel implements ActionListener {
             x[i] = 0;
             y[i] =0;
         }
+        AIx[0] = GAME_WIDTH-UNIT_SIZE;
+        AIy[0] = GAME_HEIGHT-UNIT_SIZE;
+        AIbodyParts= 4;
         bodyParts = 4;
+        AIfruitsEaten = 0;
         fruitsEaten = 0;
         direction = 'R';
+        AIdirection = 'L';
 
     }
     @Override
     public void actionPerformed(ActionEvent e) {
         if(running){
             move();
+            AImove();
             checkFruit();
             checkCollisions();
         }
