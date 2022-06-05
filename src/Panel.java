@@ -1,6 +1,8 @@
+import javax.sql.PooledConnection;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -8,29 +10,26 @@ public class Panel extends JPanel implements ActionListener {
 
     static final int GAME_WIDTH = 800;
     static final int GAME_HEIGHT = 800;
-    static final int UNIT_SIZE = 80;
+    static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (GAME_WIDTH*GAME_HEIGHT)/UNIT_SIZE;
     static final int DELAY = 100;
     final int x[] = new int[GAME_UNITS];
     final int y[] = new int[GAME_UNITS];
     int bodyParts = 4;
     int fruitsEaten;
-    //coordinates for AI snake
+    //koordynaty dla weza SI
     final int AIx[] = new int[GAME_UNITS];
 
     final int AIy[] = new int[GAME_UNITS];
-    int AIbodyParts = 5;
+    int AIbodyParts = 4;
     int AIfruitsEaten;
     int fruitX[] = new int [2];
-    int newX[] = new int [2];
-    int fruitY[] = new int [2];;
-    int newY[] = new int [2];;
+    int fruitY[] = new int [2];
     char direction = 'R';
     char AIdirection = 'L';
     boolean running = false;
     boolean launched = false;
     boolean hidebutton = false;
-    boolean isfruit;
     boolean won = false;
     Timer time;
     Random random;
@@ -91,7 +90,7 @@ public class Panel extends JPanel implements ActionListener {
             g.setFont(new Font("Arial",Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("Twoj wynik: " +fruitsEaten, UNIT_SIZE, g.getFont().getSize());
-            g.drawString("Wynik AI: " +AIfruitsEaten, 7*UNIT_SIZE, g.getFont().getSize());
+            g.drawString("Wynik AI: " +AIfruitsEaten, 10*UNIT_SIZE, g.getFont().getSize());
         }
         else {
             hidebutton = false;
@@ -104,38 +103,69 @@ public class Panel extends JPanel implements ActionListener {
         }
     }
     }
-    public boolean isTaken(int a, int b){
 
-        for(int i = 0; i<bodyParts; i++){
-            if(x[i] == a)
+    public boolean isFieldEmpty(Point point, boolean checkFruits)
+    {
+        if (point.x < 0 || point.x >= GAME_WIDTH / UNIT_SIZE || point.y < 0 || point.y >= GAME_HEIGHT / UNIT_SIZE)
+            return false;
+
+        if (checkFruits)
+        {
+            for(int i = 0; i < 2; ++i)
             {
+                int logic_x = fruitX[i] / UNIT_SIZE;
+                int logic_y = fruitY[i] / UNIT_SIZE;
 
-                return true;
-            }
-            if(y[i] == b)
-            {
-
-                return true;
+                if (logic_x == point.x && logic_y == point.y)
+                    return false;
             }
         }
-        return false;
+
+        for(int i = 0; i < bodyParts; ++i)
+        {
+            int logic_x = x[i] / UNIT_SIZE;
+            int logic_y = y[i] / UNIT_SIZE;
+
+            if (logic_x == point.x && logic_y == point.y)
+                return false;
+        }
+
+        for(int i = 0; i < AIbodyParts; ++i)
+        {
+            int logic_x = AIx[i] / UNIT_SIZE;
+            int logic_y = AIy[i] / UNIT_SIZE;
+
+            if (logic_x == point.x && logic_y == point.y)
+                return false;
+        }
+
+        return true;
     }
-    public void newFruit(int fruit){
-        newX[fruit] =ThreadLocalRandom.current().nextInt(0,(GAME_WIDTH/UNIT_SIZE))*UNIT_SIZE;
-        newY[fruit] =ThreadLocalRandom.current().nextInt(0,(GAME_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
-        //nie wier czemu to nie dziala jestem chyba glupi i nie rozumiem pewnych rzeczy
-       /* isfruit=isTaken(newX[fruit],newY[fruit]);
-        while(isfruit){
-            newX[fruit] = ThreadLocalRandom.current().nextInt(0,(GAME_WIDTH/UNIT_SIZE))*UNIT_SIZE;
-            newY[fruit] =ThreadLocalRandom.current().nextInt(0,(GAME_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
-            isfruit=isTaken(newX[fruit],newY[fruit]);
-            if (!isfruit)
+
+    public ArrayList<Point> getEmptyFields(boolean checkFruits)
+    {
+        var points = new ArrayList<Point>();
+        for (int x = 0; x < GAME_WIDTH/UNIT_SIZE; ++x)
+        {
+            for (int y = 0; y < GAME_HEIGHT/UNIT_SIZE; ++y)
             {
-            break;
+                var pt = new Point(x, y);
+                if (isFieldEmpty(pt, checkFruits))
+                    points.add(pt);
             }
-        }*/
-        fruitX[fruit] = newX[fruit];
-        fruitY[fruit] = newY[fruit];
+        }
+
+        return points;
+    }
+
+    public void newFruit(int fruit){
+        var fields = getEmptyFields(true);
+        if (fields.size() > 0)
+        {
+            int rand = ThreadLocalRandom.current().nextInt(0, fields.size());
+            fruitX[fruit] = fields.get(rand).x * UNIT_SIZE;
+            fruitY[fruit] = fields.get(rand).y * UNIT_SIZE;
+        }
     }
     public void move() {
         for(int i = bodyParts; i>0; i--){
@@ -160,7 +190,39 @@ public class Panel extends JPanel implements ActionListener {
     }
     public void AImove(){
         //dla AI
-        for(int i = AIbodyParts; i>0; i--){
+        Point pos = new Point(AIx[0]/UNIT_SIZE, AIy[0]/UNIT_SIZE);
+
+        char[] directions = { 'U', 'D', 'L', 'R' };
+        Point[] targetPos = new Point[4];
+
+        for (int i = 0; i < 4; ++i)
+        {
+            var pt = pos.move(directions[i]);
+            targetPos[i] = isFieldEmpty(pt, false) ? pt : null;
+        }
+
+        Point fruit1 = new Point(fruitX[0]/UNIT_SIZE, fruitY[0]/UNIT_SIZE);
+        Point fruit2 = new Point(fruitX[1]/UNIT_SIZE, fruitY[1]/UNIT_SIZE);
+
+        Point target = null;
+        int targetDist = 0;
+        char targetDir = AIdirection;
+        for (int i = 0; i < 4; ++i)
+        {
+            if (targetPos[i] != null) {
+                int dist = Math.min(targetPos[i].getDistance(fruit1), targetPos[i].getDistance(fruit2));
+                if (target == null || targetDist > dist) {
+                    target = targetPos[i];
+                    targetDist = dist;
+                    targetDir = directions[i];
+                }
+            }
+        }
+
+        AIdirection = targetDir;
+
+        for(int i = AIbodyParts; i>0; i--)
+        {
             AIx[i] =AIx[i-1];
             AIy[i] =AIy[i-1];
         }
