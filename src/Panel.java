@@ -25,6 +25,12 @@ public class Panel extends JPanel implements ActionListener {
     int AIfruitsEaten;
     int fruitX[] = new int [2];
     int fruitY[] = new int [2];
+    int bugX;
+    int bugY;
+
+
+    int obstacleX[] = new int [(int)GAME_UNITS/1000];
+    int obstacleY[] = new int [(int)GAME_UNITS/1000];
     char direction = 'R';
     char AIdirection = 'L';
     boolean running = false;
@@ -46,6 +52,8 @@ public class Panel extends JPanel implements ActionListener {
     public void startGame() {
         newFruit(0);
         newFruit(1);
+        newBug();
+        genObstacles();
         time = new Timer(DELAY, this);
         time.start();
 
@@ -67,6 +75,13 @@ public class Panel extends JPanel implements ActionListener {
             g.setColor(Color.YELLOW);
             g.fillOval(fruitX[0], fruitY[0], UNIT_SIZE, UNIT_SIZE);
             g.fillOval(fruitX[1], fruitY[1], UNIT_SIZE, UNIT_SIZE);
+            g.setColor(Color.MAGENTA);
+            g.fillOval(bugX, bugY, UNIT_SIZE, UNIT_SIZE);
+            //rysowanie przeszkod
+            g.setColor(Color.DARK_GRAY);
+            for(int i = 0; i<obstacleX.length; i++) {
+                g.fillRect(obstacleX[i], obstacleY[i], UNIT_SIZE, UNIT_SIZE);
+            }
 
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
@@ -138,6 +153,12 @@ public class Panel extends JPanel implements ActionListener {
             if (logic_x == point.x && logic_y == point.y)
                 return false;
         }
+        for(int i = 0; i < obstacleX.length; ++i){
+            int logic_x = obstacleX[i] / UNIT_SIZE;
+            int logic_y = obstacleY[i] / UNIT_SIZE;
+            if (logic_x == point.x && logic_y == point.y)
+                return false;
+        }
 
         return true;
     }
@@ -166,6 +187,24 @@ public class Panel extends JPanel implements ActionListener {
             fruitX[fruit] = fields.get(rand).x * UNIT_SIZE;
             fruitY[fruit] = fields.get(rand).y * UNIT_SIZE;
         }
+    }
+    public void newBug(){
+        var fields = getEmptyFields(true);
+        if (fields.size() > 0)
+        {
+            int rand = ThreadLocalRandom.current().nextInt(0, fields.size());
+            bugX = fields.get(rand).x * UNIT_SIZE;
+            bugY = fields.get(rand).y * UNIT_SIZE;
+        }
+    }
+    public void genObstacles(){
+        var fields = getEmptyFields(true);
+            for(int i = 0; i<obstacleX.length; i++) {
+                int rand = ThreadLocalRandom.current().nextInt(0, fields.size());
+                obstacleX[i] = fields.get(rand).x * UNIT_SIZE;
+                obstacleY[i] = fields.get(rand).y * UNIT_SIZE;
+            }
+
     }
     public void move() {
         for(int i = bodyParts; i>0; i--){
@@ -241,6 +280,45 @@ public class Panel extends JPanel implements ActionListener {
                 break;
         }
     }
+    public void moveBug(){
+        int rand = ThreadLocalRandom.current().nextInt(0, 20);
+        int _bugX = bugX;
+        int _bugY = bugY;
+        var pt = new Point(_bugX, _bugY);
+
+        switch(rand){
+            case 0:
+                _bugY = bugY -UNIT_SIZE;
+                pt = new Point(_bugX, _bugY);
+                if (isFieldEmpty(pt, true)){
+                    bugY=_bugY;
+                }
+                break;
+            case 1:
+                _bugY = bugY +UNIT_SIZE;
+                pt = new Point(_bugX, _bugY);
+                if (isFieldEmpty(pt, true)){
+                    bugY=_bugY;
+                }
+                break;
+            case 2:
+                _bugX = bugX -UNIT_SIZE;
+                pt = new Point(_bugX, _bugY);
+                if (isFieldEmpty(pt, true)){
+                    bugX=_bugX;
+                }
+                break;
+            case 3:
+                _bugX = bugX +UNIT_SIZE;
+                pt = new Point(_bugX, _bugY);
+                if (isFieldEmpty(pt, true)){
+                    bugX=_bugX;
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
     public void checkFruit() {
         if((x[0] == fruitX[0]) && (y[0]==fruitY[0])){
@@ -253,6 +331,11 @@ public class Panel extends JPanel implements ActionListener {
             fruitsEaten++;
             newFruit(1);
         }
+        if((x[0] == bugX) && (y[0]==bugY)){
+            bodyParts+=3;
+            fruitsEaten+=3;
+            newBug();
+        }
         if((AIx[0] == fruitX[0]) && (AIy[0]==fruitY[0])){
             AIbodyParts++;
             AIfruitsEaten++;
@@ -262,6 +345,11 @@ public class Panel extends JPanel implements ActionListener {
             AIbodyParts++;
             AIfruitsEaten++;
             newFruit(1);
+        }
+        if((AIx[0] == bugX) && (AIy[0]==bugY)){
+            AIbodyParts+=3;
+            AIfruitsEaten+=3;
+            newBug();
         }
     }
     public void checkCollisions() {
@@ -280,6 +368,16 @@ public class Panel extends JPanel implements ActionListener {
         //jezeli waz uderzy w krawedzie
         if(x[0]<0 || x[0] >= GAME_WIDTH || y[0]<0 || y[0]>=GAME_HEIGHT){
             running = false;
+        }
+        //jezeli waz uderzy w przeszkode
+        for(int i = 0; i<obstacleX.length; i++){
+            if(x[0] == obstacleX[i] && y[0] ==obstacleY[i]){
+                running = false;
+            }
+            if(AIx[0] == obstacleX[i] && AIy[0] ==obstacleY[i]){
+                won = true;
+                running = false;
+            }
         }
         if (running == false){
             time.stop();
@@ -407,6 +505,7 @@ public class Panel extends JPanel implements ActionListener {
         if(running){
             move();
             AImove();
+            moveBug();
             checkFruit();
             checkCollisions();
         }
