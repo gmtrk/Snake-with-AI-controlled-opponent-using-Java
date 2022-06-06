@@ -5,6 +5,8 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.lang.Thread;
+import java.lang.InterruptedException;
 
 public class Panel extends JPanel implements ActionListener {
 
@@ -228,7 +230,12 @@ public class Panel extends JPanel implements ActionListener {
         }
 
     }
-    public void AImove(){
+    public class moveSnake extends Thread {
+        public void run() {
+            move();
+        }
+    }
+   public void AImove(){
         //dla AI
         Point pos = new Point(AIx[0]/UNIT_SIZE, AIy[0]/UNIT_SIZE);
 
@@ -283,6 +290,13 @@ public class Panel extends JPanel implements ActionListener {
                 break;
         }
     }
+        public class moveAI extends Thread {
+            public void run() {
+                AImove();
+                }
+            }
+
+
     public void moveBug(){
         int rand = ThreadLocalRandom.current().nextInt(0, 20);
         int _bugX = bugX;
@@ -313,6 +327,11 @@ public class Panel extends JPanel implements ActionListener {
                 break;
             default:
                 break;
+        }
+    }
+    public class BugMove extends Thread{
+        public void run(){
+            moveBug();
         }
     }
 
@@ -498,12 +517,27 @@ public class Panel extends JPanel implements ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) {
+        moveSnake MoveSnake = new moveSnake();
+        moveAI MoveAI = new moveAI();
+        BugMove bugMove = new BugMove();
         if(running){
-            move();
-            AImove();
-            moveBug();
+            MoveAI.start();
+            MoveSnake.start();
+            bugMove.start();
+            try {
+
+                MoveSnake.join();
+                checkCollisions();
+                MoveAI.join();
+                checkCollisions();
+                bugMove.join();
+                checkCollisions();
+            }
+            catch(Exception exc){
+                System.out.println(exc);
+            }
             checkFruit();
-            checkCollisions();
+
         }
         repaint();
     }
