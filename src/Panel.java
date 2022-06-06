@@ -293,6 +293,7 @@ public class Panel extends JPanel implements ActionListener {
         public class moveAI extends Thread {
             public void run() {
                 AImove();
+                checkCollisions();
                 }
             }
 
@@ -332,6 +333,7 @@ public class Panel extends JPanel implements ActionListener {
     public class BugMove extends Thread{
         public void run(){
             moveBug();
+            checkCollisions();
         }
     }
 
@@ -371,11 +373,15 @@ public class Panel extends JPanel implements ActionListener {
         //jezeli waz uderzy w samego siebie
         for(int i = bodyParts; i>0;i--){
             if((x[0] == x[i])&&(y[0] ==y[i])){
-                running = false;
+                if(x[0] == 0 && y[0] == 0){
+
+                }else {
+                    running = false;
+                }
             }
         }
         //jezeli waz uderzy w AI
-        for(int i = bodyParts; i>0;i--){
+        for(int i = AIbodyParts; i>0;i--){
             if((x[0] == AIx[i])&&(y[0] ==AIy[i])){
                 running = false;
             }
@@ -398,7 +404,7 @@ public class Panel extends JPanel implements ActionListener {
             time.stop();
         }
         //jezeli AI waz uderzy w siebie
-        for(int i = bodyParts; i>0;i--){
+        for(int i = AIbodyParts; i>0;i--){
             if((AIx[0] == AIx[i])&&(AIy[0] ==AIy[i])){
                 won = true;
                 running = false;
