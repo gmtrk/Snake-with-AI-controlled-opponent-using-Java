@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="81702b40-86d4-4524-aeca-8a3d041e658b" name="Changes" comment="added multithreading">
+    <list default="true" id="81702b40-86d4-4524-aeca-8a3d041e658b" name="Changes" comment="fixed a bug where two of the snakes could overlap">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
     </list>
@@ -75,7 +75,7 @@
       <workItem from="1654454457240" duration="7733000" />
       <workItem from="1654465728868" duration="390000" />
       <workItem from="1654527798726" duration="3558000" />
-      <workItem from="1654542583405" duration="473000" />
+      <workItem from="1654542583405" duration="3675000" />
     </task>
     <task id="LOCAL-00001" summary="added basic snake functionality">
       <created>1654267180206</created>
@@ -119,7 +119,14 @@
       <option name="project" value="LOCAL" />
       <updated>1654531053911</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="fixed a bug where two of the snakes could overlap">
+      <created>1654543106750</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1654543106750</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -143,6 +150,7 @@
     <MESSAGE value="added random obstacles + moving fruit(bug)" />
     <MESSAGE value="improved moving bug functionality, improved AI of the enemy" />
     <MESSAGE value="added multithreading" />
-    <option name="LAST_COMMIT_MESSAGE" value="added multithreading" />
+    <MESSAGE value="fixed a bug where two of the snakes could overlap" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed a bug where two of the snakes could overlap" />
   </component>
 </project>

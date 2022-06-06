@@ -41,7 +41,11 @@ public class Panel extends JPanel implements ActionListener {
     boolean won = false;
     Timer time;
     Random random;
+    /**
+     * funckja do inicjalizacji okna gry
+     */
     Panel(){
+
         AIx[0] = GAME_WIDTH-UNIT_SIZE;
         AIy[0] = GAME_HEIGHT-UNIT_SIZE;
         random = new Random();
@@ -51,6 +55,10 @@ public class Panel extends JPanel implements ActionListener {
         this.addKeyListener(new Adapter());
         startGame();
     }
+
+    /**
+     * tworzy nowe owoce oraz poczatkowe przeszkody
+     */
     public void startGame() {
         newFruit(0);
         newFruit(1);
@@ -60,6 +68,11 @@ public class Panel extends JPanel implements ActionListener {
         time.start();
 
     }
+
+    /**
+     * funckja pozwalajaca nam rysowac na oknie
+     * @param g the <code>Graphics</code> object to protect
+     */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
@@ -70,10 +83,12 @@ public class Panel extends JPanel implements ActionListener {
         }
         else{
         if (running) {
+            //narysuj siatke
             for (int i = 0; i < GAME_HEIGHT / UNIT_SIZE; i++) {
                 g.drawLine(i * UNIT_SIZE, 0, i * UNIT_SIZE, GAME_HEIGHT);
                 g.drawLine(0, i * UNIT_SIZE, GAME_WIDTH, i * UNIT_SIZE);
             }
+            //narysuj owoce
             g.setColor(Color.YELLOW);
             g.fillOval(fruitX[0], fruitY[0], UNIT_SIZE, UNIT_SIZE);
             g.fillOval(fruitX[1], fruitY[1], UNIT_SIZE, UNIT_SIZE);
@@ -83,7 +98,7 @@ public class Panel extends JPanel implements ActionListener {
             for(int i = 0; i<obstacleX.length; i++) {
                 g.fillRect(obstacleX[i], obstacleY[i], UNIT_SIZE, UNIT_SIZE);
             }
-
+            //narysuj weza
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
                     g.setColor(Color.GREEN);
@@ -93,6 +108,7 @@ public class Panel extends JPanel implements ActionListener {
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
+            //narysuj przeciwnika
             for (int i = 0; i < AIbodyParts; i++) {
                 if (i == 0) {
                     g.setColor(Color.RED);
@@ -102,8 +118,12 @@ public class Panel extends JPanel implements ActionListener {
                     g.fillRect(AIx[i], AIy[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
+            //narysuj robaka
             g.setColor(Color.MAGENTA);
             g.fillOval(bugX, bugY, UNIT_SIZE, UNIT_SIZE);
+            g.setColor(Color.CYAN);
+            g.fillRect(0, 0, UNIT_SIZE, UNIT_SIZE);
+
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial",Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
@@ -122,6 +142,12 @@ public class Panel extends JPanel implements ActionListener {
     }
     }
 
+    /**
+     * sprawdza czy wskazane pole jest puste
+     * @param point
+     * @param checkFruits
+     * @return
+     */
     public boolean isFieldEmpty(Point point, boolean checkFruits)
     {
         if (point.x < 0 || point.x >= GAME_WIDTH / UNIT_SIZE || point.y < 0 || point.y >= GAME_HEIGHT / UNIT_SIZE)
@@ -166,6 +192,11 @@ public class Panel extends JPanel implements ActionListener {
         return true;
     }
 
+    /**
+     * zwraca array liste pustych pol
+     * @param checkFruits
+     * @return
+     */
     public ArrayList<Point> getEmptyFields(boolean checkFruits)
     {
         var points = new ArrayList<Point>();
@@ -182,6 +213,10 @@ public class Panel extends JPanel implements ActionListener {
         return points;
     }
 
+    /**
+     * gdy jeden z owocow zostanie zlapany, zeby na jego miejsce tworzyl sie nowy
+     * @param fruit - ktory z owocow nalezy wygenerowac
+     */
     public void newFruit(int fruit){
         var fields = getEmptyFields(true);
         if (fields.size() > 0)
@@ -191,6 +226,10 @@ public class Panel extends JPanel implements ActionListener {
             fruitY[fruit] = fields.get(rand).y * UNIT_SIZE;
         }
     }
+
+    /**
+     * do tworzenia poruszajacego sie owoca, czyli robaka, co tik robak ma 20% szans na przesuniecie sie na sasiadujacy mu kafelek
+     */
     public void newBug(){
         var fields = getEmptyFields(true);
         if (fields.size() > 0)
@@ -200,6 +239,10 @@ public class Panel extends JPanel implements ActionListener {
             bugY = fields.get(rand).y * UNIT_SIZE;
         }
     }
+
+    /**
+     * generowanie losowych przeszkod na planszy
+     */
     public void genObstacles(){
         var fields = getEmptyFields(true);
             for(int i = 0; i<obstacleX.length; i++) {
@@ -209,6 +252,10 @@ public class Panel extends JPanel implements ActionListener {
             }
 
     }
+
+    /**
+     * poruszanie sie wezem przez gracza
+     */
     public void move() {
         for(int i = bodyParts; i>0; i--){
             x[i] =x[i-1];
@@ -233,8 +280,14 @@ public class Panel extends JPanel implements ActionListener {
     public class moveSnake extends Thread {
         public void run() {
             move();
+            checkCollisions();
+            checkFruit();
         }
     }
+
+    /**
+     * poruszanie sie wezem przez AI, wybierze najlepsza droge do owoca omijajac przy tym przeszkody
+     */
    public void AImove(){
         //dla AI
         Point pos = new Point(AIx[0]/UNIT_SIZE, AIy[0]/UNIT_SIZE);
@@ -294,10 +347,13 @@ public class Panel extends JPanel implements ActionListener {
             public void run() {
                 AImove();
                 checkCollisions();
+                checkFruit();
                 }
             }
 
-
+    /**
+     * poruszanie się robaka
+     */
     public void moveBug(){
         int rand = ThreadLocalRandom.current().nextInt(0, 20);
         int _bugX = bugX;
@@ -334,9 +390,13 @@ public class Panel extends JPanel implements ActionListener {
         public void run(){
             moveBug();
             checkCollisions();
+            checkFruit();
         }
     }
 
+    /**
+     * sprawdzanie czy weszlismy w kontakt z owocem/robakiem
+     */
     public void checkFruit() {
         if((x[0] == fruitX[0]) && (y[0]==fruitY[0])){
             bodyParts++;
@@ -369,6 +429,10 @@ public class Panel extends JPanel implements ActionListener {
             newBug();
         }
     }
+
+    /**
+     * sprawdzanie kolizji gracza oraz AI
+     */
     public void checkCollisions() {
         //jezeli waz uderzy w samego siebie
         for(int i = bodyParts; i>0;i--){
@@ -426,6 +490,11 @@ public class Panel extends JPanel implements ActionListener {
             time.stop();
         }
     }
+
+    /**
+     * rysowanie ekranu w przypadku przegranej
+     * @param g
+     */
     public void GameOver(Graphics g) {
         g.setColor(Color.RED);
         g.setFont(new Font("Arial",Font.BOLD, 75));
@@ -454,6 +523,11 @@ public class Panel extends JPanel implements ActionListener {
             }
         });
     }
+
+    /**
+     * rysowanie ekranu w przypadku zwyciestwa
+     * @param g
+     */
     public void GameWon(Graphics g) {
         g.setColor(Color.RED);
         g.setFont(new Font("Arial",Font.BOLD, 75));
@@ -482,11 +556,22 @@ public class Panel extends JPanel implements ActionListener {
             }
         });
     }
+
+    /**
+     * rysowanie glownego menu
+     * @param g
+     */
     public void GameMenu(Graphics g) {
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial",Font.BOLD, 75));
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Snake na javie", (GAME_WIDTH - metrics.stringWidth("Snake na javie"))/2, GAME_HEIGHT/2);
+        g.setFont(new Font("Arial",Font.BOLD, 20));
+        metrics = getFontMetrics(g.getFont());
+        g.drawString("Zasady:", (GAME_WIDTH - metrics.stringWidth("Zasady"))/2, 3*GAME_HEIGHT/4);
+        g.drawString("Zbieraj owoce oraz robaki, manewruj miedzy przeszkodami, pokonaj przeciwnika!", (GAME_WIDTH - metrics.stringWidth("Zbieraj owoce oraz robaki, manewruj miedzy przeszkodami, pokonaj przeciwnika!"))/2, 25+3*GAME_HEIGHT/4);
+        g.drawString("Zolte owoce sa warte 1 punkt, robaki w kolorze magenta sa warte 3 punkty", (GAME_WIDTH - metrics.stringWidth("Zolte owoce sa warte 1 punkt, robaki w kolorze magenta sa warte 3 punkty"))/2, 50+3*GAME_HEIGHT/4);
+        g.drawString("Uwaga! Robaki potrafia wskoczyc na przeszkody, a nawet moga ujezdzac weze!", (GAME_WIDTH - metrics.stringWidth("Uwaga! Robaki potrafia wskoczyc na przeszkody, a nawet moga ujezdzac weze!"))/2, 75+3*GAME_HEIGHT/4);
         JButton b = new JButton("Rozpocznij gre!");
         b.setBounds((GAME_WIDTH/2)-75,(GAME_HEIGHT/2)+25,150,50);
         if(!hidebutton) {
@@ -503,6 +588,10 @@ public class Panel extends JPanel implements ActionListener {
         });
 
     }
+
+    /**
+     * resetowanie gry i ustawienie wszystkich parametrow na poczatkowe
+     */
     public void ResetGame(){
         for(int i =0; i<bodyParts; i++){
             x[i] = 0;
@@ -521,6 +610,11 @@ public class Panel extends JPanel implements ActionListener {
         AIdirection = 'L';
 
     }
+
+    /**
+     * glowny game loop
+     * @param e the event to be processed
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
         moveSnake MoveSnake = new moveSnake();
@@ -548,6 +642,9 @@ public class Panel extends JPanel implements ActionListener {
         repaint();
     }
 
+    /**
+     * nasluchuje klikniecia strzalek przez gracza
+     */
     public class Adapter extends KeyAdapter{
         @Override
         public void keyPressed(KeyEvent e){
