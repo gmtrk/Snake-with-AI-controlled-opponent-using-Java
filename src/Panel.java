@@ -75,8 +75,7 @@ public class Panel extends JPanel implements ActionListener {
             g.setColor(Color.YELLOW);
             g.fillOval(fruitX[0], fruitY[0], UNIT_SIZE, UNIT_SIZE);
             g.fillOval(fruitX[1], fruitY[1], UNIT_SIZE, UNIT_SIZE);
-            g.setColor(Color.MAGENTA);
-            g.fillOval(bugX, bugY, UNIT_SIZE, UNIT_SIZE);
+
             //rysowanie przeszkod
             g.setColor(Color.DARK_GRAY);
             for(int i = 0; i<obstacleX.length; i++) {
@@ -101,6 +100,8 @@ public class Panel extends JPanel implements ActionListener {
                     g.fillRect(AIx[i], AIy[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
+            g.setColor(Color.MAGENTA);
+            g.fillOval(bugX, bugY, UNIT_SIZE, UNIT_SIZE);
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial",Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
@@ -242,6 +243,7 @@ public class Panel extends JPanel implements ActionListener {
 
         Point fruit1 = new Point(fruitX[0]/UNIT_SIZE, fruitY[0]/UNIT_SIZE);
         Point fruit2 = new Point(fruitX[1]/UNIT_SIZE, fruitY[1]/UNIT_SIZE);
+        Point bug = new Point(bugX/UNIT_SIZE, bugY/UNIT_SIZE);
 
         Point target = null;
         int targetDist = 0;
@@ -249,7 +251,8 @@ public class Panel extends JPanel implements ActionListener {
         for (int i = 0; i < 4; ++i)
         {
             if (targetPos[i] != null) {
-                int dist = Math.min(targetPos[i].getDistance(fruit1), targetPos[i].getDistance(fruit2));
+
+                int dist = Math.min(targetPos[i].getDistance(fruit1), Math.min(targetPos[i].getDistance(fruit2),targetPos[i].getDistance(bug)));
                 if (target == null || targetDist > dist) {
                     target = targetPos[i];
                     targetDist = dist;
@@ -288,32 +291,25 @@ public class Panel extends JPanel implements ActionListener {
 
         switch(rand){
             case 0:
-                _bugY = bugY -UNIT_SIZE;
-                pt = new Point(_bugX, _bugY);
-                if (isFieldEmpty(pt, true)){
-                    bugY=_bugY;
+                if((bugY - UNIT_SIZE)>0) {
+                    bugY = bugY - UNIT_SIZE;
                 }
                 break;
             case 1:
-                _bugY = bugY +UNIT_SIZE;
-                pt = new Point(_bugX, _bugY);
-                if (isFieldEmpty(pt, true)){
-                    bugY=_bugY;
+                if((bugY + UNIT_SIZE)<GAME_HEIGHT) {
+                    bugY = bugY + UNIT_SIZE;
                 }
                 break;
             case 2:
-                _bugX = bugX -UNIT_SIZE;
-                pt = new Point(_bugX, _bugY);
-                if (isFieldEmpty(pt, true)){
-                    bugX=_bugX;
+                if((bugX - UNIT_SIZE)>0) {
+                    bugX = bugX - UNIT_SIZE;
                 }
                 break;
             case 3:
-                _bugX = bugX +UNIT_SIZE;
-                pt = new Point(_bugX, _bugY);
-                if (isFieldEmpty(pt, true)){
-                    bugX=_bugX;
+                if((bugX + UNIT_SIZE)<GAME_WIDTH) {
+                    bugX = bugX + UNIT_SIZE;
                 }
+
                 break;
             default:
                 break;

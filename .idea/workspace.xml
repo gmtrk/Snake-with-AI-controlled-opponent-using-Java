@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="81702b40-86d4-4524-aeca-8a3d041e658b" name="Changes" comment="added AI snake collision and fruit grabbing skills">
+    <list default="true" id="81702b40-86d4-4524-aeca-8a3d041e658b" name="Changes" comment="added random obstacles + moving fruit(bug)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Panel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Panel.java" afterDir="false" />
     </list>
@@ -72,7 +72,9 @@
       <workItem from="1653850855293" duration="1565000" />
       <workItem from="1654259270474" duration="15915000" />
       <workItem from="1654348838970" duration="5541000" />
-      <workItem from="1654454457240" duration="6450000" />
+      <workItem from="1654454457240" duration="7733000" />
+      <workItem from="1654465728868" duration="390000" />
+      <workItem from="1654527798726" duration="635000" />
     </task>
     <task id="LOCAL-00001" summary="added basic snake functionality">
       <created>1654267180206</created>
@@ -95,7 +97,14 @@
       <option name="project" value="LOCAL" />
       <updated>1654352622136</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="added random obstacles + moving fruit(bug)">
+      <created>1654460978381</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1654460978381</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -116,6 +125,7 @@
     <MESSAGE value="added basic snake functionality" />
     <MESSAGE value="added menu functionality" />
     <MESSAGE value="added enemy snake without collision, added second fruit" />
-    <option name="LAST_COMMIT_MESSAGE" value="added enemy snake without collision, added second fruit" />
+    <MESSAGE value="added random obstacles + moving fruit(bug)" />
+    <option name="LAST_COMMIT_MESSAGE" value="added random obstacles + moving fruit(bug)" />
   </component>
 </project>
