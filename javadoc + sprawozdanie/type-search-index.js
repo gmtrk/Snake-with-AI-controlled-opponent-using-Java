@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"<Unnamed>","l":"Panel.Adapter"},{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"<Unnamed>","l":"Panel.BugMove"},{"p":"<Unnamed>","l":"Frame"},{"p":"<Unnamed>","l":"Game"},{"p":"<Unnamed>","l":"Panel.moveAI"},{"p":"<Unnamed>","l":"Panel.moveSnake"},{"p":"<Unnamed>","l":"Panel"},{"p":"<Unnamed>","l":"Point"}];updateSearchResults();
