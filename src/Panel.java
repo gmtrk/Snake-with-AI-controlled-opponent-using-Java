@@ -8,33 +8,73 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.lang.Thread;
 import java.lang.InterruptedException;
 
+/**
+ * tutaj znajduje się cała logika gry
+ */
 public class Panel extends JPanel implements ActionListener {
-
+    /**
+     * GAME_WIDTH - szerokosc okna
+     * GAME_HEIGHT - wysokosc okna
+     * UNIT_SIZE - wielkosc jednej jednostki, gra najlepiej dziala jezeli jest rozdzielczosc jest jej wielokrotnoscia
+     * GAME_UNITS - ilosc jednostek
+     * DELAY - dyktuje nam predkosc gry, im wyzsza tym tik trwa dluzej
+     */
     static final int GAME_WIDTH = 800;
     static final int GAME_HEIGHT = 800;
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (GAME_WIDTH*GAME_HEIGHT)/UNIT_SIZE;
     static final int DELAY = 100;
+    /**
+     * x[] - pozycja x poszczegolnych segmentow weza, np x[0] to jego glowa, a przy dlugosci 4 x[3] to jego ostatni fragment
+     * y[] - pozycja y poszczegolnych segmentow weza, patrz wyzej na przyklad
+     * bodyParts - liczba segmentow weza, domyslnie zaczyna z 4
+     * fruitsEaten - wynik, liczba zjedzonych owocow
+     */
     final int x[] = new int[GAME_UNITS];
     final int y[] = new int[GAME_UNITS];
     int bodyParts = 4;
     int fruitsEaten;
     //koordynaty dla weza SI
+    /**
+     * AIx[] - pozycja x poszczegolnych segmentow weza, np AIx[0] to jego glowa, a przy dlugosci 4 AIx[3] to jego ostatni fragment
+     * AIy[] - pozycja y poszczegolnych segmentow weza, patrz wyzej na przyklad
+     * AIbodyParts - liczba segmentow weza, domyslnie zaczyna z 4
+     * AIfruitsEaten - wynik, liczba zjedzonych owocow
+     */
     final int AIx[] = new int[GAME_UNITS];
 
     final int AIy[] = new int[GAME_UNITS];
     int AIbodyParts = 4;
     int AIfruitsEaten;
+    /**
+     * fruitX[] - tablica zawierajaca koordynaty x owoców, jezeli chcemy wiecej owocow to mozemy zmienic wielkosc tablicy
+     * fruitY[] - tablica zawierajaca koordynaty y owoców
+     * bugX - koordynaty x robaka
+     * bugY - koordynaty y robaka
+     */
     int fruitX[] = new int [2];
     int fruitY[] = new int [2];
     int bugX;
     int bugY;
 
-
+    /**
+     * obstacleX[] - tablica koordynatow x przeszkod
+     * obstacleY[] - tablica koordynatow y przeszkod
+     */
     int obstacleX[] = new int [(int)GAME_UNITS/1000];
     int obstacleY[] = new int [(int)GAME_UNITS/1000];
+    /**
+     * direction - zmienna kierunku weza, przydatna do obslugi poruszania sie
+     * AIdirection - zmienna kierunku weza AI.
+     */
     char direction = 'R';
     char AIdirection = 'L';
+    /**
+     * running - czy gra jeszcze trwa
+     * launched - czy gra zostala pierwszy raz zainicjalizowana
+     * hidebutton - zmienna do chowania przycisku kiedy jest nie potrzebny
+     * won - czy gra zostala wygrana przez gracza
+     */
     boolean running = false;
     boolean launched = false;
     boolean hidebutton = false;
@@ -42,7 +82,7 @@ public class Panel extends JPanel implements ActionListener {
     Timer time;
     Random random;
     /**
-     * funckja do inicjalizacji okna gry
+     * funkcja do inicjalizacji okna gry
      */
     Panel(){
 
@@ -281,7 +321,7 @@ public class Panel extends JPanel implements ActionListener {
         public void run() {
             move();
             checkCollisions();
-            checkFruit();
+
         }
     }
 
@@ -347,7 +387,7 @@ public class Panel extends JPanel implements ActionListener {
             public void run() {
                 AImove();
                 checkCollisions();
-                checkFruit();
+
                 }
             }
 

@@ -1,5 +1,8 @@
 import javax.swing.*;
 
+/**
+ * tworzenie nowego okna
+ */
 public class Frame extends JFrame{
     Frame()
     {
